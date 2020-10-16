@@ -1,0 +1,18 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+before_script:
+  - docker login -u $PRIVATE_REGISTRY_USERNAME -p $PRIVATE_REGISTRY_PASSWORD docker.turno.co.nz:2053
+  - docker pull docker.turno.co.nz:2053/turno-ubuntu:latest
+
+build-master:
+  stage: build
+  script:
+    - export IMAGE_NAME=docker.turno.co.nz:2053/southern-phone
+    - build () { docker build . --target $1 -t $IMAGE_NAME:latest-$1; docker push $IMAGE_NAME:latest-$1; echo "Image $IMAGE_NAME:latest-$1"; }
+    - build dev
+    - build prod
+  only:
+    - master
